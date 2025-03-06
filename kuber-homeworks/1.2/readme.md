@@ -36,7 +36,7 @@ curl
 [Pod с именем netology-web](./files/netology-web.yaml)  
 3. Создать Service с именем netology-svc и подключить к netology-web.  
 манифест  
-[Pod с именем netology-web](./files/netology-svc.yaml)  
+[SVC с именем netology-svc](./files/netology-svc.yaml)  
 
 вывод kubectl get pods  
 ![kubectl get pods](./images/1-0.png)  
