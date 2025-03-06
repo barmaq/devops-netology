@@ -13,17 +13,17 @@
 1. Создать манифест (yaml-конфигурацию) Pod.
 2. Использовать image - gcr.io/kubernetes-e2e-test-images/echoserver:2.2.
 манифест
-(Pod с именем hello-world)[./files/hello-world.yaml]  
+[Pod с именем hello-world](./files/hello-world.yaml)  
 
 вывод kubectl get pods  
-!(kubectl get pods)[./images/1-0.png]  
+![kubectl get pods](./images/1-0.png)  
 
 3. Подключиться локально к Pod с помощью `kubectl port-forward` и вывести значение (curl или в браузере).
 port-forward  
-!(port-forward)[./images/1-1.png]  
+![port-forward](./images/1-1.png)  
 
 curl  
-!(curl)[./images/1-2.png]  
+![curl](./images/1-2.png)  
 
 ------
 
@@ -32,22 +32,22 @@ curl
 1. Создать Pod с именем netology-web.
 2. Использовать image — gcr.io/kubernetes-e2e-test-images/echoserver:2.2.  
 манифест  
-(Pod с именем netology-web)[./files/netology-web.yaml]  
+[Pod с именем netology-web](./files/netology-web.yaml)  
 3. Создать Service с именем netology-svc и подключить к netology-web.  
 манифест  
-(Pod с именем netology-web)[./files/netology-svc.yaml]  
+[Pod с именем netology-web](./files/netology-svc.yaml)  
 
 вывод kubectl get pods  
-!(kubectl get pods)[./images/1-0.png]  
+![kubectl get pods](./images/1-0.png)  
 
 вывод kubectl get svc  
-!(kubectl get pods)[./images/2-0.png]  
+![kubectl get pods](./images/2-0.png)    
 4. Подключиться локально к Service с помощью `kubectl port-forward` и вывести значение (curl или в браузере).
 port-forward  
-!(port-forward)[./images/2-1.png]  
+![port-forward][(./images/2-1.png)  
 
 curl  
-!(curl)[./images/2-2.png]  
+![curl](./images/2-2.png)    
 
 
 
