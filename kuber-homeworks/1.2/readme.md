@@ -18,7 +18,7 @@
 вывод kubectl get pods  
 ![kubectl get pods](./images/1-0.png)  
 
-3. Подключиться локально к Pod с помощью `kubectl port-forward` и вывести значение (curl или в браузере).  
+3. Подключиться локально к Pod с помощью `kubectl port-forward` и вывести значение (curl или в браузере).
 port-forward  
 ![port-forward](./images/1-1.png)  
 
