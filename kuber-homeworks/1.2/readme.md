@@ -12,7 +12,7 @@
 
 1. Создать манифест (yaml-конфигурацию) Pod.
 2. Использовать image - gcr.io/kubernetes-e2e-test-images/echoserver:2.2.  
-манифест
+манифест  
 [Pod с именем hello-world](./files/hello-world.yaml)  
 
 вывод kubectl get pods  
