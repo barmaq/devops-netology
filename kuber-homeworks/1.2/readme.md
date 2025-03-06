@@ -20,7 +20,7 @@
 
 3. Подключиться локально к Pod с помощью `kubectl port-forward` и вывести значение (curl или в браузере).
 
-port-forward
+port-forward  
 ![port-forward](./images/1-1.png)  
 
 curl  
