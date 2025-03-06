@@ -43,9 +43,9 @@ curl
 
 вывод kubectl get svc  
 ![kubectl get pods](./images/2-0.png)    
-4. Подключиться локально к Service с помощью `kubectl port-forward` и вывести значение (curl или в браузере).
-port-forward  
-![port-forward][(./images/2-1.png)  
+4. Подключиться локально к Service с помощью `kubectl port-forward` и вывести значение (curl или в браузере).  
+port-forward   
+![port-forward](./images/2-1.png)  
 
 curl  
 ![curl](./images/2-2.png)    
