@@ -27,7 +27,7 @@
 вывода команды `kubectl get nodes`
 ![kubectl get nodes](images/1.png)
 
-скриншот дашборда
+скриншот дашборда через kubectl port-forward 
 ![скриншот дашборда](images/2.png)
 
 ### Критерии оценки
