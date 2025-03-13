@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-deployment-svc
+spec:
+  selector:
+    app: nginx-deployment
+  ports:
+    - name: nginx-http
+      protocol: TCP
+      port: 80
