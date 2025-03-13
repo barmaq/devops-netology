@@ -51,7 +51,7 @@ kubectl scale deployment nginx-multitool --replicas=2
 
 3. Продемонстрировать количество подов до и после масштабирования.
 
-kubectl get pods
+kubectl get pods    
 ![1-2](./images/1-3.png)
 
 4. Создать Service, который обеспечит доступ до реплик приложений из п.1.
