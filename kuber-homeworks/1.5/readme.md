@@ -78,7 +78,7 @@ kubectl get node -o wide
 
 для проверки вносим в /etc/hosts 
 ```	
-127.0.0.1 barmaq-netology.com	
+192.168.253.203 barmaq-netology.com	
 ```
 
 првоеряем	
@@ -87,7 +87,7 @@ C:\Windows\System32\curl.exe barmaq-netology.com/
 C:\Windows\System32\curl.exe barmaq-netology.com/api
 ```	
 
-полный путь с cutl потому что при вызове в VS в Windows просто curl вызывается Invoke-WebRequest от PowerShell для которогос интаксис будет отилчаться	
+полный путь с curl потому что при вызове в VS в Windows просто curl вызывается Invoke-WebRequest от PowerShell, для которого синтаксис будет отлbчаться	
 ![результат](./images/2-2.png)	
 
 
