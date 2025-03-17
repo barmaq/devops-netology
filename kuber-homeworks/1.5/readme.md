@@ -87,7 +87,7 @@ C:\Windows\System32\curl.exe barmaq-netology.com/
 C:\Windows\System32\curl.exe barmaq-netology.com/api
 ```	
 
-полный путь с curl потому что при вызове в VS в Windows просто curl вызывается Invoke-WebRequest от PowerShell, для которого синтаксис будет отлbчаться	
+полный путь с curl потому что при вызове в VS в Windows просто curl вызывается Invoke-WebRequest от PowerShell, для которого синтаксис будет отличаться	
 ![результат](./images/2-2.png)	
 
 
