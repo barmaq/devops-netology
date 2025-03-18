@@ -6,21 +6,6 @@
 
 ------
 
-### Чеклист готовности к домашнему заданию
-
-1. Установленное K8s-решение (например, MicroK8S).
-2. Установленный локальный kubectl.
-3. Редактор YAML-файлов с подключенным GitHub-репозиторием.
-
-------
-
-### Дополнительные материалы для выполнения задания
-
-1. [Инструкция по установке MicroK8S](https://microk8s.io/docs/getting-started).
-2. [Описание Volumes](https://kubernetes.io/docs/concepts/storage/volumes/).
-3. [Описание Multitool](https://github.com/wbitt/Network-MultiTool).
-
-------
 
 ### Задание 1 
 
@@ -33,6 +18,26 @@
 3. Обеспечить возможность чтения файла контейнером multitool.
 4. Продемонстрировать, что multitool может читать файл, который периодоически обновляется.
 5. Предоставить манифесты Deployment в решении, а также скриншоты или вывод команды из п. 4.
+
+создаем манифест	  		
+[deployment](./files/deployment.yaml)  	
+
+применяем  
+```
+kubectl apply -f ./files/deployment.yaml  
+kubectl get po  
+```
+
+проверяем 		  
+```
+kubectl exec -it busybox-multitool-5d9495d747-6m6n5 -c multitool -- bash  
+ls /testfolder  
+cat /testfolder/time.txt  
+cat /testfolder/time.txt  
+```
+
+видим что записи в /testfolder/time.txt в контейнере multitool обновляется контейнером busybox  
+![результат](./images/1-1.png)  
 
 ------
 
@@ -47,12 +52,24 @@
 3. Продемонстрировать возможность чтения файла изнутри пода.
 4. Предоставить манифесты Deployment, а также скриншоты или вывод команды из п. 2.
 
-------
 
-### Правила приёма работы
+создаем манифест	  		
+[deployment](./files/daemonset.yaml)  	
 
-1. Домашняя работа оформляется в своём Git-репозитории в файле README.md. Выполненное задание пришлите ссылкой на .md-файл в вашем репозитории.
-2. Файл README.md должен содержать скриншоты вывода необходимых команд `kubectl`, а также скриншоты результатов.
-3. Репозиторий должен содержать тексты манифестов или ссылки на них в файле README.md.
+применяем  
+```
+kubectl apply -f ./files/daemonset.yaml
+kubectl get po
+```
+
+проверяем 		  
+```
+kubectl exec -it daemon-multitool-ddm5q -c multitool -- bash  
+ls /testfolder/
+tail -f testfolder/syslog
+```
+видим содержимое syslog  ноды test-ansible
+![результат](./images/2-1.png) 
+
 
 ------
