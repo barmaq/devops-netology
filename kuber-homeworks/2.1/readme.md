@@ -66,7 +66,7 @@ kubectl get po
 ```
 kubectl exec -it daemon-multitool-ddm5q -c multitool -- bash  
 ls /testfolder/
-tail -f testfolder/syslog
+tail -f /testfolder/syslog
 ```
 видим содержимое syslog  ноды test-ansible
 ![результат](./images/2-1.png) 
