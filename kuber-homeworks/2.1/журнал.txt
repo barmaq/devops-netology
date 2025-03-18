@@ -1,0 +1,93 @@
+
+
+
+
+volumeMounts:
+- name: localtime
+  mountPath: /etc/in
+
+
+
+
+
+volumes:
+  -name: localtime
+   emptyDir: {}
+или
+volumes:
+  -name: localtime
+   hostPath:
+     path: /etc/data
+   
+get po -w
+kubectl exec -it mypod -c <имя контейнера> --bash
+
+cd /etc/in/
+echo Text > /etc/in/test.txt
+ls
+
+
+kubectl exec -it mypod -c <имя контейнера> --bash
+cd /etc/out/
+ls
+cat /etc/out/test.txt
+
+
+-----------------------
+Создать Deployment приложения, состоящего из двух контейнеров и обменивающихся данными.
+
+Создать Deployment приложения, состоящего из контейнеров busybox и multitool.
+Сделать так, чтобы busybox писал каждые пять секунд в некий файл в общей директории.
+Обеспечить возможность чтения файла контейнером multitool.
+Продемонстрировать, что multitool может читать файл, который периодоически обновляется.
+Предоставить манифесты Deployment в решении, а также скриншоты или вывод команды из п. 4.
+
+создаем манифест	  		
+[deployment](./files/deployment.yaml)  	
+
+применяем  
+```
+kubectl apply -f ./files/deployment.yaml  
+kubectl get po  
+```
+
+проверяем 		  
+```
+kubectl exec -it busybox-multitool-5d9495d747-6m6n5 -c multitool -- bash  
+ls /testfolder  
+cat /testfolder/time.txt  
+cat /testfolder/time.txt  
+```
+
+видим что записи в /testfolder/time.txt в контейнере multitool обновляется контейнером busybox  
+![результат](./images/1-1.png)
+
+
+
+-----------------------
+
+Создать DaemonSet приложения, которое может прочитать логи ноды.
+
+Создать DaemonSet приложения, состоящего из multitool.
+Обеспечить возможность чтения файла /var/log/syslog кластера MicroK8S.
+Продемонстрировать возможность чтения файла изнутри пода.
+Предоставить манифесты Deployment, а также скриншоты или вывод команды из п. 2.
+
+
+создаем манифест	  		
+[deployment](./files/daemonset.yaml)  	
+
+применяем  
+```
+kubectl apply -f ./files/daemonset.yaml
+kubectl get po
+```
+
+проверяем 		  
+```
+kubectl exec -it daemon-multitool-ddm5q -c multitool -- bash  
+ls /testfolder/
+tail -f testfolder/syslog
+```
+видим содержимое syslog  ноды test-ansible
+![результат](./images/2-1.png)
