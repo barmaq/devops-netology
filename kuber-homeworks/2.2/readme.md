@@ -121,9 +121,9 @@ kubectl get storageclasses
 2. Создать Deployment приложения состоящего из multitool, и подключить к нему PV, созданный автоматически на сервере NFS.
 
 манифест deployment  
-[sc](./files/deployment2.yaml)   
+[deployment](./files/deployment2.yaml)   
 манифест PVC  
-[sc](./files/nfs-pvc.yaml)   
+[PVC](./files/nfs-pvc.yaml)   
 
 создаем ресурсы и проверяем  
 ```
