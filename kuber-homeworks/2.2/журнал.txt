@@ -1,0 +1,182 @@
+volume
+
+persistent volume
+интерфейс к хранилищу
+
+типы доступа по чтению записи
+политики удаления
+
+pvc - persistent volume claim
+PV не зависят от  namespace!
+
+
+storage class
+
+name 
+provisioner
+parameters
+
+kubectl get pv
+kubectl get pvc
+
+get storageclasses
+в случае с storageclasses pv создаются автоматом
+
+----
+
+microk8s enable hostpath-storage
+
+----
+kubectl get storageclasses
+
+kubectl get pv
+kubectl get pvc
+
+----------------------------------
+Что нужно сделать
+
+Создать Deployment приложения, использующего локальный PV, созданный вручную.
+
+Создать Deployment приложения, состоящего из контейнеров busybox и multitool.
+Создать PV и PVC для подключения папки на локальной ноде, которая будет использована в поде.
+Продемонстрировать, что multitool может читать файл, в который busybox пишет каждые пять секунд в общей директории.
+Удалить Deployment и PVC. Продемонстрировать, что после этого произошло с PV. Пояснить, почему.
+Продемонстрировать, что файл сохранился на локальном диске ноды. Удалить PV. Продемонстрировать что произошло с файлом после удаления PV. Пояснить, почему.
+Предоставить манифесты, а также скриншоты или вывод необходимых команд.
+
+
+1.Создать Deployment приложения, состоящего из контейнеров busybox и multitool.
+
+2.Создать PV и PVC для подключения папки на локальной ноде, которая будет использована в поде.
+
+kubectl apply -f .\files\pv.yaml
+kubectl apply -f .\files\pvc.yaml
+kubectl apply -f .\files\deployment.yaml
+
+3.Продемонстрировать, что multitool может читать файл, в который busybox пишет каждые пять секунд в общей директории.
+
+kubectl get pv
+kubectl get pvc
+kubectl get po 
+
+обращаем внимание на статус pv - Bound означает что произошла связка с pvc
+
+kubectl exec -it busybox-multitool-7fd498bf64-ktg9c -c multitool -- bash  
+ls /testfolder
+cat /testfolder/time.txt
+
+
+4.Удалить Deployment и PVC. Продемонстрировать, что после этого произошло с PV. Пояснить, почему.
+
+kubectl delete -f .\files\deployment.yaml
+kubectl delete -f .\files\pvc.yaml
+
+kubectl get po
+kubectl get pvc
+kubectl get pv
+
+статус pv изменился на Released
+pod использовавший наше pvc был удален. никакой процесс больше не использовался самим pvc , это позволило нам его так же удалить.
+при этом пропала связь между pvc и pv и pv теперь можно связать с другим, подходящим по условиям  pvc
+
+
+5.Продемонстрировать, что файл сохранился на локальном диске ноды. Удалить PV. Продемонстрировать что произошло с файлом после удаления PV. Пояснить, почему.
+
+на ноде
+ls /mnt/tmp
+
+теперь
+kubectl delete -f .\files\pv.yaml
+kubectl get pv
+No resources found
+
+снова проверяем на ноде 
+ls /mnt/tmp
+
+файл и его содержимое будет там присутствовать без изменений. происходит это потому что pv позволяет лишь поулчить доступ к хранилищу , при этом им не являясь. 
+Поэтому с файлами ничего не произошло , даже после удаления pv
+
+
+---------------------------------------
+
+Задание 2
+Что нужно сделать
+
+Создать Deployment приложения, которое может хранить файлы на NFS с динамическим созданием PV.
+
+Включить и настроить NFS-сервер на MicroK8S.
+
+
+1.Включить и настроить NFS-сервер на MicroK8S.
+
+sudo apt update
+sudo apt install -y nfs-kernel-server
+
+sudo mkdir -p /mnt/nfs
+sudo chown -R nobody:nogroup /mnt/nfs
+sudo chmod 777 /mnt/nfs
+
+sudo mv /etc/exports /etc/exports.bak
+echo '/mnt/nfs *(rw,sync,no_subtree_check,no_root_squash)' | sudo tee -a /etc/exports
+
+sudo systemctl restart nfs-kernel-server
+проверка  nfs
+sudo showmount -e localhost
+
+подключаем к microk8s
+microk8s enable helm3
+microk8s helm3 repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+microk8s helm3 repo update
+
+
+microk8s helm3 install csi-driver-nfs csi-driver-nfs/csi-driver-nfs \
+    --namespace kube-system \
+    --set kubeletDir=/var/snap/microk8s/common/var/lib/kubelet
+
+microk8s kubectl wait pod --selector app.kubernetes.io/name=csi-driver-nfs --for condition=ready --namespace kube-system
+
+
+включаем на k8s
+microk8s kubectl get csidrivers
+
+создаем манифест на ноде
+применяем
+microk8s kubectl apply -f sc.yaml
+проверяем
+microk8s kubectl get sc
+
+
+на основном проверяем
+kubectl get storageclasses
+
+2.Создать Deployment приложения состоящего из multitool, и подключить к нему PV, созданный автоматически на сервере NFS.
+
+
+kubectl apply -f ./files/nfs-pvc.yaml
+kubectl apply -f ./files/deployment2.yaml
+
+kubectl get po
+kubectl get pvc
+kubectl get pv
+
+
+3.Продемонстрировать возможность чтения и записи файла изнутри пода.
+
+kubectl get po -o wide
+
+kubectl exec -it busybox-multitool-7688894d6b-7w2bw -c multitool -- bash 
+
+ls /testfolder
+echo "Hello World!" > /testfolder/test.txt
+ls /testfolder
+cat /testfolder/test.txt
+
+
+првоеряем так же на ноде с шарой
+cat /mnt/nfs/pvc-3d3ccf48-ac33-45bc-a469-1c72eaa3e953/test.txt 
+Hello World!
+
+
+
+
+
