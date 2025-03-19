@@ -106,7 +106,7 @@ ls /mnt/tmp
 https://microk8s.io/docs/how-to-nfs  
 
 манифест sc  
-![sc](./files/sc.yaml)   
+[sc](./files/sc.yaml)   
 
 проверяем 
 ```
@@ -121,9 +121,9 @@ kubectl get storageclasses
 2. Создать Deployment приложения состоящего из multitool, и подключить к нему PV, созданный автоматически на сервере NFS.
 
 манифест deployment  
-![sc](./files/deployment2.yaml)   
+[sc](./files/deployment2.yaml)   
 манифест PVC  
-![sc](./files/nfs-pvc.yaml)   
+[sc](./files/nfs-pvc.yaml)   
 
 создаем ресурсы и проверяем  
 ```
