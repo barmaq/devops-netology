@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-html
+data:
+  index.html:
+    <html>
+    <body>
+      <h1>"Hello Word!"</h1>
+    </body>
+    </html>
+
+  HTTP_PORT:
+    "8080"
+---

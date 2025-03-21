@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment
+  labels:
+    app: nginx-multitool
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-multitool
+  template:
+    metadata:
+      labels:
+        app: nginx-multitool
+    spec:
+      containers:
+      - name: nginx-multitool
+        image: nginx
+        ports: 
+        - containerPort: 80
+          name: nginx-port
+        volumeMounts:
+        - name: web-html
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: web-html
+        configMap:
+          name: api-html
+
+
+        

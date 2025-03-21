@@ -1,0 +1,132 @@
+
+конфигурация
+configmap
+переменные окружения
+
+конфигурация через файлы
+
+
+secret
+вебинар по сетевому  взаимодействию - в конце как делать по Https
+
+kubectl create configmap с опцией --from-file.  позволит  создать ConfigMap на основе файла, вместо того чтобы передавать его содержимое напрямую.
+kubectl create configmap configmap21-2 --from-file=index.html=/path/to/your/index.html -n netology
+
+команда создаст ConfigMap с именем configmap21-2 в пространстве имен netology, где содержимое файла index.html будет добавлено в ConfigMap.
+
+configmap  и secret нужно создовать ДО подов
+некоторые - env  в подах не обновится. нужно будет его перезапустить
+размер не более 1MB  , для secret - 750kB
+
+
+
+
+Задание 1. Создать Deployment приложения и решить возникшую проблему с помощью ConfigMap. Добавить веб-страницу
+Создать Deployment приложения, состоящего из контейнеров nginx и multitool.
+Решить возникшую проблему с помощью ConfigMap.
+Продемонстрировать, что pod стартовал и оба конейнера работают.
+Сделать простую веб-страницу и подключить её к Nginx с помощью ConfigMap. Подключить Service и показать вывод curl или в браузере.
+Предоставить манифесты, а также скриншоты или вывод необходимых команд.
+
+
+Задание 2. Создать приложение с вашей веб-страницей, доступной по HTTPS
+Создать Deployment приложения, состоящего из Nginx.
+Создать собственную веб-страницу и подключить её как ConfigMap к приложению.
+Выпустить самоподписной сертификат SSL. Создать Secret для использования сертификата.
+Создать Ingress и необходимый Service, подключить к нему SSL в вид. Продемонстировать доступ к приложению по HTTPS.
+Предоставить манифесты, а также скриншоты или вывод необходимых команд.
+
+
+создаем configmap  с переменными со значеиями value
+
+kubectl get configmaps
+kubectl describe configmaps <имя>
+
+secret
+echo  "значение" | base64 --decode
+kubectl get secrets
+
+kubectl describe  secrets <имя>
+kubectl get secrets <имя> -o yaml
+
+-----------------
+
+
+		volumeMounts:
+		  name: web-html
+		  mountPath: usr/share/nginx/html
+      volumes: 
+	  - name: web-html
+	    configMap:
+		  name: api-html
+		  
+----
+metadata:
+  name: api-html
+data:
+  index.html:
+    <html>
+    <body>
+	  <h1>"Hello Word!"</h1>
+	</body>
+	</html>
+  
+
+-----------------
+
+Задание 1. Создать Deployment приложения и решить возникшую проблему с помощью ConfigMap. Добавить веб-страницу
+Создать Deployment приложения, состоящего из контейнеров nginx и multitool.
+Решить возникшую проблему с помощью ConfigMap.
+Продемонстрировать, что pod стартовал и оба конейнера работают.
+Сделать простую веб-страницу и подключить её к Nginx с помощью ConfigMap. Подключить Service и показать вывод curl или в браузере.
+Предоставить манифесты, а также скриншоты или вывод необходимых команд.
+
+создаем манифесты
+
+kubectl apply -f ./files/api-html.yaml
+kubectl apply -f ./files/deployment.yaml
+
+kubectl get configmaps
+kubectl get pods
+kubectl describe configmaps api-html
+
+для проверки запроса от нас добавляем сервис nodePort
+
+kubectl apply -f ./files/svc-nodeport.yaml
+kubectl get nodes -o wide
+curl 192.168.253.203:30080
+
+
+-----------------
+
+Создать приложение с вашей веб-страницей, доступной по HTTPS
+Создать Deployment приложения, состоящего из Nginx.
+Создать собственную веб-страницу и подключить её как ConfigMap к приложению.
+Выпустить самоподписной сертификат SSL. Создать Secret для использования сертификата.
+Создать Ingress и необходимый Service, подключить к нему SSL в вид. Продемонстировать доступ к приложению по HTTPS.
+Предоставить манифесты, а также скриншоты или вывод необходимых команд.
+
+
+самоподписанный сертификат
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=barmaq-netology.com/0=barmaq-netology.com"
+кодируем  в base64
+base64 -w 0 tls.crt
+base64 -w 0 tls.key
+
+
+создаем манифесты
+следим чтобы не было лишних пробелов в конце ключей в секретах!
+
+kubectl apply -f ./files/secret-tls.yaml
+kubectl apply -f ./files/api-html.yaml
+kubectl apply -f ./files/deployment2.yaml
+kubectl apply -f ./files/svc-nodeport.yaml
+kubectl apply -f ./files/ingress.yaml
+
+kubectl get secrets
+kubectl describe secrets nginx-tls
+
+
+curl -k https://barmaq-netology.com
+
+kubectl exec -it deployment-6bb44bd79b-d749p -- bash 
