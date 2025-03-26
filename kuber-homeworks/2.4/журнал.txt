@@ -1,0 +1,251 @@
+управление доступом
+
+авторизация
+ base 
+ ssl серт
+ token
+ сторонние приложения
+ 
+для нового пользователя админ кластера создает новые серт и ключ, подписывает их
+или через CertificateSigningRequest
+
+токены
+создается сертвис аккаунт, к нему привязывается токен
+
+
+роли RBAC
+настраиваеются через Role и ClusterRole
+роли привязываются к пользователям или сервис аккаунтам через RoleBinding и ClusterRoleBinding
+
+-----------------------------------
+kubectl create serviceaccount test
+kubectl get serviceaccounts
+
+kubectl describe serviceaccounts test
+
+по умолчанию  токенов нет в сервиаккаунте
+
+надо создать секрет для токена. аннотация очень важна!
+
+nano sa-token.yaml
+
+apiVersion: v1
+kind: Secret
+metadata:
+	name: test-token
+	annotations:
+	  kubernetes.io/service-account.name: test
+type: kubernetes.io/service-account-token
+---
+
+kubectl apply -f sa-token.yaml
+kubectl describe serviceaccounts test 
+kubectl get secrets 
+kubectl describe secrets test-token
+
+export TOKEN=<токен>
+echo $TOKEN
+
+теперь пробуем
+
+nano ~./kube/config
+находим ендпоинт  ( сервер и порт )
+
+curl -k https://192.168.250.1:16443
+ошибка - доступ не авторизован
+
+нужно передать хеадер с токеном
+curl --header "Authorization: Bearer ${$TOKEN}" -k https://192.168.250.1:16443
+-------------------------------
+сертификаты
+
+openssl genrsa -out netology.key 2048
+теперь запрос на создание серта| сабджект это имя пользователя
+openssl req -new -key netology.key -out netology.csr -subj "/CN=netology/O=ops"
+cat netology.csr
+
+теперь надо выполнить реквест
+нужен корневые ключ и серт с сервера с k8s ( или  microk8s )
+scp root@192.168.250.1:/var/snap/microk8s/current/certs/ca.crt
+scp root@192.168.250.1:/var/snap/microk8s/current/certs/ca.key
+
+нужно выпустить ключ сроком жизни до 500 дней
+openssl x509 -req -in netology.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out netology.crt -days 500
+
+пользователь выпускает csr , передаает админу. админ подписывает и передает ему crt
+или все делает админ
+
+подключаемся
+либо создадим нового юзера в kubeconfig либо через kubectl
+
+kubectl config set-credentials netology --client-certificate=netology.crt --client-key=netology.key --embed-certs=true
+создается юзер
+nano ~./kube/config
+создается польщователь
+
+теперь нужно создать новый контекст
+kubectl config set-context netology --cluster=microk8s-cluster --user=netology
+контекст создание.  меняем текущий контекст на него
+kubectl config use-context netology
+
+права не давали но доступ есть.так только в microk8s потому что та мпо умолчанию выключен RBAC
+включаем на кластере
+microk8s enable rbac
+
+теперь  на юзере
+kub get nodes 
+доступа к данным у юзера нет
+
+а под основным
+kubectl config use-context microk8s
+все есть
+
+добавляем роли и права
+создаем роль 
+nano role.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: netology-role
+rules:
+- apiGroups: [""]
+  resources: ["pods","services"]
+  verbs: ["get","list","watch","update"]
+
+kubectl -f role.yaml
+kubectl describe role netology-role
+
+теперь надо создать role-binding
+nano role-binding.yaml
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: netology-role_binding
+subjects:
+- kind: User
+  name: netology
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: netology-role
+  apiGroup: rbac.authorization.k8s.io
+  
+kubectl -f role-binding.yaml
+
+переключаемся обратно 
+kubectl config use-context netology
+kubectl get pod 
+все ок
+kubectl get nodes
+доступа нет
+
+
+-----------------------------
+домашка
+1. Создайте и подпишите SSL-сертификат для подключения к кластеру.
+
+
+все стал генерить на сервере, поскольку все мое. но в реальных услових запрос генерился бы клиентом, подписывал бы администратор на сервере
+на кластере :
+
+создаем ключ
+openssl genrsa -out netology.key 2048
+
+теперь запрос на создание серта. subject это имя пользователя
+openssl req -new -key netology.key -out netology.csr -subj "/CN=netology/O=ops"
+
+смотрим
+cat netology.csr
+
+теперь надо выполнить реквест
+нужен корневые ключ и серт с сервера с k8s ( или  microk8s )
+scp root@192.168.250.1:/var/snap/microk8s/current/certs/ca.crt
+scp root@192.168.250.1:/var/snap/microk8s/current/certs/ca.key
+
+нужно выпустить ключ сроком жизни до 500 дней
+openssl x509 -req \
+-in netology.csr \
+-CA /var/snap/microk8s/current/certs/ca.crt \
+-CAkey /var/snap/microk8s/current/certs/ca.key \
+-CAcreateserial \
+-out netology.crt \
+-days 500
+
+итоговые netology.crt и netology.key передаем клиенту
+я забираю при помощи scp
+scp barmaq@192.168.253.203:/home/barmaq/netology.crt ./files/netology.crt
+scp barmaq@192.168.253.203:/home/barmaq/netology.key ./files/netology.key
+
+2.Настройте конфигурационный файл kubectl для подключения
+
+включаем на кластере
+microk8s enable rbac
+
+
+на клиенте
+создадим нового юзера через kubectl
+kubectl config set-credentials netology --client-certificate=./files/netology.crt --client-key=./files/netology.key --embed-certs=true
+проверяем
+cat ~./kube/config
+появился дополнительный пользователь - name: netology
+
+теперь нужно создать новый контекст
+kubectl config set-context netology --cluster=microk8s-cluster --user=netology
+kubectl config use-context netology
+kubectl config get-contexts
+kubectl config get-users
+
+проверяем
+kubectl get nodes 
+доступа нет. все правильно
+
+
+3.Предусмотрите права пользователя. Пользователь может просматривать логи подов и их конфигурацию (kubectl logs pod <pod_id>, kubectl describe pod <pod_id>).
+
+добавляем роли и права
+
+переключаемся обратно на пользователя с полными правами
+kubectl config use-context microk8s
+
+создаем роль 
+role.yaml
+
+kubectl apply -f ./files/role.yaml
+проверим 
+kubectl describe role netology-role
+
+
+теперь надо создать role-binding
+role-binding.yaml
+
+kubectl apply -f ./files/role-binding.yaml
+проверим
+kubectl describe rolebinding netology-role-binding
+
+
+4.Предусмотрите права пользователя. Пользователь может просматривать логи подов и их конфигурацию (kubectl logs pod <pod_id>, kubectl describe pod <pod_id>).
+
+в манифесте роли мы дали доступ к ресурсам pods и pods/log и к операциям  get, list, watch
+
+создаем под для проверки 
+kubectl run multitool --image=wbitt/network-multitool
+
+переключаемся на пользователя netology
+kubectl config use-context netology
+
+проверяем
+kubectl get pods
+kubectl logs multitool
+kubectl describe multitool
+
+пробуем посмотреть что то из ресурсов вне рамок роли
+
+kubectl get svc
+kubectl get nodes 
+
+получаем сообщение о ограничении в правах 
+
+
+
