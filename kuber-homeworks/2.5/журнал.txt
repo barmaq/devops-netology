@@ -1,0 +1,126 @@
+Helm
+менеджер пакетов для k8s
+
+в helm есть шаблонизация
+набор директорий с использованием переменных
+
+главный файл 
+Chart.yaml - описание и метаданные
+values.yaml 	- параметры
+templates - шаблоны
+charts - доп чарты
+
+
+
+helm create netology-chart
+cd netology-chart
+ls
+
+nano Chart.yaml
+rmdir charts  (  не нужно в этом примере )
+сносим содержмое values.yaml
+сносим содержимое папки templates
+
+два этапа template  и  install
+
+просмотр перед установкой
+helm template netology . 
+установка
+helm install .
+
+список релизов
+helm list
+
+при повторной установке будет ошабка елси чарт уже есть
+helm upgrade netology .
+
+установка только если есть переменная
+
+{{- if }}
+
+-----
+
+helm template netology .  -f test-values
+
+в дипломной пригодится
+kube prom stack
+ставит  prom и grafana
+GitHub - charts/kube-prometheus-stack
+
+можно поместить в  /templates/notes.txt файл с справочным содержимым которое выведется при установке чарта 
+
+статьи по HELM - на хабре. начальные этапы
+
+-----------------
+
+установка helm
+поставил через winget 
+https://learn.microsoft.com/en-us/windows/package-manager/
+
+winget install Helm.Helm
+
+----------------
+Задание 1. Подготовить Helm-чарт для приложения
+Необходимо упаковать приложение в чарт для деплоя в разные окружения.
+Каждый компонент приложения деплоится отдельным deployment’ом или statefulset’ом.
+В переменных чарта измените образ приложения для изменения версии.
+
+
+создаем чарт
+helm create myapp
+
+проверяем и запускаем
+helm template myapp .
+helm install myapp .
+или
+helm upgrade myapp .
+
+helm list
+kubectl get svc -o wide 
+kubectl get nodes -o wide
+curl http://192.168.253.203:30285
+
+
+меняем таг в values
+првоеряем текущую версию
+kubectl get po
+kubectl exec -ti myapp-69d8fbcd59-jkpm7 -- nginx -v
+апгрейдим чарт
+снова проверяем версию
+helm upgrade myapp .
+kubectl exec -ti myapp-69bfdb6496-mb84m -- nginx -v
+
+видим что версия изменилась на 1.25
+
+
+--------------
+
+Задание 2. Запустить две версии в разных неймспейсах
+Подготовив чарт, необходимо его проверить. Запуститe несколько копий приложения.
+Одну версию в namespace=app1, вторую версию в том же неймспейсе, третью версию в namespace=app2.
+Продемонстрируйте результат.
+
+подготавливаем чарт и проверяем 
+валидируем синтаксис
+helm lint .    
+
+упаковываем
+helm package .
+
+
+запускаем в разных неймспейсах. в пределах одного неймспейса даем уникальные имена!
+helm install myapp-1 myapp-0.0.1.tgz --create-namespace --namespace app1
+helm install myapp-2 myapp-0.0.1.tgz --create-namespace --namespace app1
+helm install myapp-1 myapp-0.0.1.tgz --create-namespace --namespace app2
+
+проверяем
+helm list --all-namespaces
+kubectl get po --all-namespaces -o wide |grep app
+kubectl get svc --all-namespaces -o wide |grep app
+
+у меня helm и kubectl под windows , поэтому :
+helm list --all-namespaces
+kubectl get po --all-namespaces -o wide |Select-String app
+kubectl get svc --all-namespaces -o wide |Select-String app
+
+![результат](./images/1-1.png)  
