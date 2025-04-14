@@ -81,13 +81,14 @@ nano inventory/mycluster/inventory.ini
 ```
 ![результат](./images/1-2.png)  
 [inventory.ini](./files/inventory.ini)  
-ждем примерно 10 минут и установка успешно завершена!   
-![результат](./images/1-3.png)  
 
 запускаем  
 ```
 ansible-playbook -i inventory/mycluster/inventory.ini cluster.yml -b -v  
 ```
+ждем примерно 10 минут и установка успешно завершена!   
+![результат](./images/1-3.png)  
+
 
 добавляем настройки кубадмин  
 ```
