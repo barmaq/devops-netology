@@ -1,0 +1,117 @@
+сеть в k8s
+ip пода уникальны в рамках кластера
+
+взаимодействие между нодами
+cna плагин
+
+при создании кластера выделаяется большая подсеть
+ 
+ днс
+на  нодах coredns в режиме deployment
+на каждой ноде кеширующий днс
+dns-autoscale увеличивает количество coredns
+
+сетевые плагины
+самый популярный сетевой плагин - calico
+
+------------
+
+kubectl get po -A -o wide
+ищем flannel , kube-proxy
+
+
+route -n
+
+brctl show
+
+
+kubectl run nginx --image=nginx --labels="app=web"
+kubectl get po
+
+
+kubectl run --rm -it test --image=curlimages/curl -- sh
+curl nginx
+пройдет 
+
+меняем сетевую политику
+на денай взодящего трафика
+
+nano deny.yaml
+
+apiVersion: networking.k8s.io/v1
+king: NetworkPolicy
+metadataL
+  name: deny-network-policy
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  
+---
+kubectl apply -f deny.yaml
+kubectl run --rm -it test --image=curlimages/curl -- sh
+curl nginx
+не пройдет
+
+
+
+сделаем разрешающий
+nano allow.yaml
+
+apiVersion: networking.k8s.io/v1
+king: NetworkPolicy
+metadataL
+  name: allow-network-policy
+spec:
+  podSelector:
+    matchLables:
+	  app: web
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+	  matchLabels:
+	    app: curl
+		
+
+- разрешить входящие подключения на под с селектором app: web   для подов с селектором app: curl
+
+kubectl apply -f allow.yaml
+kubectl run --rm -it test --image=curlimages/curl --labels="app=curl" -- sh
+curl nginx
+пройдет
+
+--------------
+
+домашка
+
+  ( можно мультитул )
+Создать deployment'ы приложений frontend, backend и cache и соответсвующие сервисы.
+В качестве образа использовать network-multitool.
+Разместить поды в namespace App.
+Создать политики, чтобы обеспечить доступ frontend -> backend -> cache. Другие виды подключений должны быть запрещены.
+Продемонстрировать, что трафик разрешён и запрещён.
+
+
+kubectl create namespace app
+kubectl apply -f ./files/
+
+kubectl get po -o wide -n app
+kubectl get deployments -o wide -n app
+kubectl get svc -o wide -n app
+kubectl get networkpolicies -n app
+
+kubectl exec -it frontend-8456ff48bb-6ksdj -n app -- /bin/bash
+kubectl exec -it backend-7f896d5994-vr6wd -n app -- /bin/bash
+kubectl exec -it cache-57dc4df9d4-swsgw -n app -- /bin/bash
+
+curl svc-backend:9002
+curl svc-cache:9003
+
+kubectl -n app run test --image=wbitt/network-multitool --rm -it --restart=Never -- bash
+
+curl svc-frontend:9001
+curl svc-backend:9002
+curl svc-cache:9003
+
