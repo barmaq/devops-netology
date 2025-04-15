@@ -26,7 +26,7 @@
 
 ### Решение
 
-1. Создадим манифесты  
+# Создадим манифесты  
 deployments:  
 [frontend](./files/frontend.yaml)  
 [backend](./files/backend.yaml)  
@@ -40,13 +40,13 @@ services:
 [svc-backend](./files/svc-backend.yaml)  
 [svc-cache](./files/svc-cache.yaml)  
 
-2. подготавливаем namespace и применяем манифесты  
+# подготавливаем namespace и применяем манифесты  
 ```
 kubectl create namespace app  
 kubectl apply -f ./files/  
 ```
 
-3. проверяем созданные ресурсы  
+# проверяем созданные ресурсы  
 ```
 kubectl get po -o wide -n app
 kubectl get deployments -o wide -n app
@@ -54,9 +54,9 @@ kubectl get svc -o wide -n app
 kubectl get networkpolicies -n app
 ```
 
-![ресурсы](./files/1-1.png)  
+![ресурсы](./images/1-1.png)  
 
-4. проверяем работу сетевых политик  
+# проверяем работу сетевых политик  
 
 frontend-backend  
 ```
@@ -65,7 +65,7 @@ curl svc-frontend:9001
 curl svc-backend:9002  
 curl svc-cache:9003  
 ```
-![frontend-backend ](./files/1-2.png)  
+![frontend-backend ](./images/1-2.png)  
 
 видим чтто доступен только backend
 
@@ -77,7 +77,7 @@ curl svc-backend:9002
 curl svc-cache:9003  
 ```
 
-![frontend-backend ](./files/1-3.png)  
+![frontend-backend ](./images/1-3.png)  
 
 видим чтто доступен только cache
 
