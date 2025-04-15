@@ -90,7 +90,7 @@ curl svc-backend:9002
 curl svc-cache:9003  
 ```
 
-![frontend-backend ](./files/1-4.png)  
+![frontend-backend ](./images/1-4.png)  
 
 видим что ни один сервис не отвечает
 
