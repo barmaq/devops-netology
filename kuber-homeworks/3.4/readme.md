@@ -69,7 +69,7 @@ kubectl describe deployment deployment | Select-String "nginx" -Context 0,3
 
 ![результат](./images/1-1.png)  
 
-### обновляем до версии nginx:1.20  
+#### обновляем до версии nginx:1.20  
 
 
 меняем в манифесте версию  
@@ -107,7 +107,7 @@ kubectl describe deployment deployment | Select-String "nginx" -Context 0,3
 
 ![результат](./images/1-4.png)  
 
-### пытаемся обновиться до версии nginx:1.28 
+#### пытаемся обновиться до версии nginx:1.28 
 
 теперь обновляемся до несуществующщей версии   
 мсеняем версию на  
@@ -137,7 +137,7 @@ Failed to pull image "nginx:1.28": rpc error: code = NotFound
 
 ![результат](./images/1-6.png)  
 
-### Откатываемся после неудачного обновления.
+#### Откатываемся после неудачного обновления.
 
 смотрим историю обновлений  
 ```
